@@ -10,9 +10,15 @@ import (
 
 var (
 	focusedStyle = lipgloss.NewStyle().
-		Padding(1, 2).
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("62"))
+			Padding(1, 2).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("62"))
+
+	titelStyle = lipgloss.NewStyle().
+			Bold(true).
+			Background(lipgloss.Color("62")).
+			Padding(0, 1).
+			MarginBottom(2)
 )
 
 type model struct {
@@ -36,13 +42,17 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
+	titleRender := ""
+	if len(m.task.Title()) > 0 {
+		titleRender = titelStyle.Render(m.task.Title())
+	}
 	return focusedStyle.Render(lipgloss.JoinVertical(
 		lipgloss.Top,
-		m.task.Title(),
+		titleRender,
 		m.task.Description(),
 	))
 }
 
 func New() *model {
-	return &model{item.New("", "")}
+	return &model{}
 }

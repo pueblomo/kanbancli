@@ -78,6 +78,15 @@ func (m *model) showTask() tea.Msg {
 	return m.lists[m.focused].SelectedItem()
 }
 
+func (m *model) deleteTask() tea.Msg {
+	selectedItem := m.lists[m.focused].SelectedItem()
+	if selectedItem != nil {
+		selectedTask := selectedItem.(item.Task)
+		m.lists[selectedTask.Status].RemoveItem(m.lists[m.focused].Index())
+	}
+	return nil
+}
+
 func (m *model) Init() tea.Cmd {
 	return nil
 }
@@ -96,6 +105,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.moveToNext
 		case "s":
 			return m, m.showTask
+		case "r":
+			return m, m.deleteTask
 		}
 	case tea.WindowSizeMsg:
 		height := msg.Height - global.Divisor
