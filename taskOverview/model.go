@@ -2,7 +2,7 @@ package taskoverview
 
 import (
 	"pueblomo/kanbancli/global"
-	"pueblomo/kanbancli/item"
+	item "pueblomo/kanbancli/model"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -34,8 +34,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		focusedStyle.Width(msg.Width/global.Divisor - global.Divisor)
 		focusedStyle.Height(msg.Height - global.Divisor)
-	case item.Task:
-		m.task = msg
+	case item.TaskMsg:
+		if !msg.Create {
+			m.task = msg.Task
+		}
 	}
 
 	return m, nil
@@ -49,7 +51,8 @@ func (m *model) View() string {
 	return focusedStyle.Render(lipgloss.JoinVertical(
 		lipgloss.Top,
 		titleRender,
-		m.task.Description(),
+		m.task.Tag(),
+		m.task.ShowDescription(),
 	))
 }
 

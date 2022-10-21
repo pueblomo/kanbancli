@@ -1,8 +1,9 @@
 package kanban
 
 import (
+	"pueblomo/kanbancli/form"
 	"pueblomo/kanbancli/global"
-	"pueblomo/kanbancli/item"
+	item "pueblomo/kanbancli/model"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -32,9 +33,9 @@ func (m *model) initLists() {
 	// Init To Do
 	m.lists[global.Todo].Title = "To Do"
 	m.lists[global.Todo].SetItems([]list.Item{
-		item.New("buy milk", "strawberry milk"),
-		item.New("eat sushi", "negitoro roll, miso soup, rice"),
-		item.New("fold laundry", "or wear wrinkly t-shirts"),
+		item.New("buy milk", "nase", "strawberry milk"),
+		item.New("eat sushi", "nase", "negitoro roll, miso soup, rice"),
+		item.New("fold laundry", "baum", "or wear wrinkly t-shirts"),
 	})
 }
 
@@ -75,7 +76,7 @@ func (m *model) moveToNext() tea.Msg {
 }
 
 func (m *model) showTask() tea.Msg {
-	return m.lists[m.focused].SelectedItem()
+	return item.NewTaskMsg(false, m.lists[m.focused].SelectedItem().(item.Task))
 }
 
 func (m *model) deleteTask() tea.Msg {
@@ -107,6 +108,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.showTask
 		case "r":
 			return m, m.deleteTask
+		case "n":
+			return form.New(m).Update(nil)
 		}
 	case tea.WindowSizeMsg:
 		height := msg.Height - global.Divisor
@@ -119,6 +122,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lists[global.InProgress].SetSize(width, height)
 		m.lists[global.Done].SetSize(width, height)
 		return m, nil
+	case item.TaskMsg:
+		if msg.Create {
+			return m, m.lists[global.Todo].InsertItem(len(m.lists[global.Todo].Items()), msg.Task)
+		}
 	}
 
 	var cmd tea.Cmd
