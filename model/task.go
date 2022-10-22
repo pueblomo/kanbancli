@@ -3,32 +3,26 @@ package model
 import "pueblomo/kanbancli/global"
 
 type Task struct {
-	Status                  global.Status
-	title, tag, description string
+	Status  global.Status
+	Subject string
+	Tag     string
+	Desc    string
 }
 
 func (t Task) Title() string {
-	return t.title
+	return t.Subject
 }
 
 func (t Task) Description() string {
-	return t.tag
-}
-
-func (t Task) Tag() string {
-	return t.tag
-}
-
-func (t Task) ShowDescription() string {
-	return t.description
+	return t.Tag
 }
 
 func (t Task) FilterValue() string {
-	return t.title
+	return t.Subject
 }
 
 func New(title, tag, description string) Task {
-	return Task{Status: global.Todo, title: title, tag: tag, description: description}
+	return Task{Status: global.Todo, Subject: title, Tag: tag, Desc: description}
 }
 
 func (t *Task) Next() {

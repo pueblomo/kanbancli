@@ -4,6 +4,7 @@ import (
 	"pueblomo/kanbancli/form"
 	"pueblomo/kanbancli/global"
 	item "pueblomo/kanbancli/model"
+	"pueblomo/kanbancli/storage"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,32 +21,30 @@ var (
 			BorderForeground(lipgloss.Color("62"))
 )
 
-type model struct {
+type Model struct {
 	focused global.Status
 	lists   []list.Model
 }
 
-func (m *model) initLists() {
-	defaultList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	defaultList.SetShowHelp(false)
-	m.lists = []list.Model{defaultList, defaultList, defaultList}
-
-	// Init To Do
-	m.lists[global.Todo].Title = "To Do"
-	m.lists[global.Todo].SetItems([]list.Item{
-		item.New("buy milk", "nase", "strawberry milk"),
-		item.New("eat sushi", "nase", "negitoro roll, miso soup, rice"),
-		item.New("fold laundry", "baum", "or wear wrinkly t-shirts"),
-	})
+func (m *Model) initLists() {
+	m.lists = storage.ReadFile()
 }
 
-func New() *model {
-	m := &model{focused: global.Todo, lists: []list.Model{}}
+func (m Model) GetLists() []list.Model {
+	return m.lists
+}
+
+func (m Model) GetSize() (height int, width int) {
+	return m.lists[global.Todo].Height(), m.lists[global.Todo].Width()
+}
+
+func New() *Model {
+	m := &Model{focused: global.Todo, lists: []list.Model{}}
 	m.initLists()
 	return m
 }
 
-func (m *model) next() tea.Msg {
+func (m *Model) next() tea.Msg {
 	if m.focused == global.Done {
 		m.focused = global.Todo
 	} else {
@@ -54,7 +53,7 @@ func (m *model) next() tea.Msg {
 	return nil
 }
 
-func (m *model) prev() tea.Msg {
+func (m *Model) prev() tea.Msg {
 	if m.focused == global.Todo {
 		m.focused = global.Done
 	} else {
@@ -63,7 +62,7 @@ func (m *model) prev() tea.Msg {
 	return nil
 }
 
-func (m *model) moveToNext() tea.Msg {
+func (m *Model) moveToNext() tea.Msg {
 	selectedItem := m.lists[m.focused].SelectedItem()
 	if selectedItem != nil {
 		selectedTask := selectedItem.(item.Task)
@@ -75,11 +74,11 @@ func (m *model) moveToNext() tea.Msg {
 	return nil
 }
 
-func (m *model) showTask() tea.Msg {
+func (m *Model) showTask() tea.Msg {
 	return item.NewTaskMsg(false, m.lists[m.focused].SelectedItem().(item.Task))
 }
 
-func (m *model) deleteTask() tea.Msg {
+func (m *Model) deleteTask() tea.Msg {
 	selectedItem := m.lists[m.focused].SelectedItem()
 	if selectedItem != nil {
 		selectedTask := selectedItem.(item.Task)
@@ -88,11 +87,11 @@ func (m *model) deleteTask() tea.Msg {
 	return nil
 }
 
-func (m *model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -109,7 +108,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "r":
 			return m, m.deleteTask
 		case "n":
-			return form.New(m).Update(nil)
+			return form.New(m, m.lists[global.Todo].Height(), m.lists[global.Todo].Width()).Update(nil)
 		}
 	case tea.WindowSizeMsg:
 		height := msg.Height - global.Divisor
@@ -133,7 +132,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *model) View() string {
+func (m *Model) View() string {
 	if len(m.lists) <= 0 {
 		return "loading..."
 	}

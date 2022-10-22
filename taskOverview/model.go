@@ -18,7 +18,13 @@ var (
 			Bold(true).
 			Background(lipgloss.Color("62")).
 			Padding(0, 1).
-			MarginBottom(2)
+			Foreground(lipgloss.Color("7"))
+
+	tagStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("242")).
+			MarginBottom(1)
+	descStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("7"))
 )
 
 type model struct {
@@ -51,8 +57,8 @@ func (m *model) View() string {
 	return focusedStyle.Render(lipgloss.JoinVertical(
 		lipgloss.Top,
 		titleRender,
-		m.task.Tag(),
-		m.task.ShowDescription(),
+		tagStyle.Render(m.task.Tag),
+		descStyle.Render(m.task.Desc),
 	))
 }
 

@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"pueblomo/kanbancli/global"
 	"pueblomo/kanbancli/kanban"
+	"pueblomo/kanbancli/storage"
 	taskoverview "pueblomo/kanbancli/taskOverview"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -41,6 +43,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func main() {
+	storage.CheckFileExists()
 	m := &model{kanban: kanban.New(), tOverview: taskoverview.New()}
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
@@ -49,4 +52,6 @@ func main() {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+	lists := m.kanban.(*kanban.Model).GetLists()
+	defer storage.WriteToFile(lists[global.Todo].Items(), lists[global.InProgress].Items(), lists[global.Done].Items())
 }

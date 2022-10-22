@@ -9,3 +9,5 @@ const (
 )
 
 const Divisor = 4
+
+const StorageName = "kanbanclistorage.json"

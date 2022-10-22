@@ -6,7 +6,17 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"pueblomo/kanbancli/global"
 	item "pueblomo/kanbancli/model"
+)
+
+var (
+	focusedStyle = lipgloss.NewStyle().
+			Padding(1, 2).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("62"))
+
+	elementStyle = lipgloss.NewStyle().Padding(1).Foreground(lipgloss.Color("7"))
 )
 
 type model struct {
@@ -16,14 +26,15 @@ type model struct {
 	oldModel    tea.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return nil
 }
 
-// TODO esc disable focus
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		focusedStyle.Width((msg.Width/global.Divisor)*3 - global.Divisor)
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
@@ -61,8 +72,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() string {
-	return lipgloss.JoinVertical(lipgloss.Left, m.titel.View(), m.tag.View(), m.description.View())
+func (m *model) View() string {
+	return focusedStyle.Render(
+		lipgloss.JoinVertical(
+			lipgloss.Left,
+			elementStyle.Render(m.titel.View()),
+			elementStyle.Render(m.tag.View()),
+			elementStyle.Render(m.description.View()),
+		),
+	)
 }
 
 func (m model) createTask() tea.Msg {
@@ -70,7 +88,7 @@ func (m model) createTask() tea.Msg {
 	return item.NewTaskMsg(true, task)
 }
 
-func New(oldModel tea.Model) *model {
+func New(oldModel tea.Model, height, width int) *model {
 	f := &model{}
 	f.titel = textinput.New()
 	f.titel.Placeholder = "Titel"
@@ -80,5 +98,17 @@ func New(oldModel tea.Model) *model {
 	f.description = textarea.New()
 	f.description.Placeholder = "Description"
 	f.oldModel = oldModel
+	f.setHeight(height)
+	f.setWidth(width)
 	return f
+}
+
+func (m *model) setHeight(height int) {
+	focusedStyle.Height(height)
+	m.description.SetHeight(height - 10)
+}
+
+func (m *model) setWidth(width int) {
+	focusedStyle.Width(width * 3)
+	m.description.SetWidth(width*3 - 10)
 }
