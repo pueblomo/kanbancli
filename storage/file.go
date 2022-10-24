@@ -29,7 +29,7 @@ var dir string
 func CheckFileExists() {
 	usr, _ := user.Current()
 	dir = usr.HomeDir
-	if _, err := os.Stat(global.StorageName); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(dir + "/" + global.StorageName); errors.Is(err, os.ErrNotExist) {
 		errCreate := os.MkdirAll(dir+"/"+global.StoragePath, os.ModePerm)
 		if errCreate != nil {
 			log.Fatalln(errCreate)
