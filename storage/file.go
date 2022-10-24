@@ -86,7 +86,7 @@ func ReadFile() []list.Model {
 		defaultList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 		models = &[]list.Model{defaultList, defaultList, defaultList}
 	}
-	(*models)[global.Todo].Title = "ToDO"
+	(*models)[global.Todo].Title = "ToDo"
 	(*models)[global.InProgress].Title = "InProgress"
 	(*models)[global.Done].Title = "Done"
 	return *models
