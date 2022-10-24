@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"os/user"
 	"pueblomo/kanbancli/global"
 	"pueblomo/kanbancli/model"
 
@@ -23,9 +24,17 @@ type storeOut struct {
 	Done       []model.Task
 }
 
+var dir string
+
 func CheckFileExists() {
+	usr, _ := user.Current()
+	dir = usr.HomeDir
 	if _, err := os.Stat(global.StorageName); errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(global.StorageName)
+		errCreate := os.MkdirAll(dir+"/"+global.StoragePath, os.ModePerm)
+		if errCreate != nil {
+			log.Fatalln(errCreate)
+		}
+		file, err := os.Create(dir + "/" + global.StorageName)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -39,14 +48,14 @@ func WriteToFile(todo []list.Item, inProgress []list.Item, done []list.Item) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = os.WriteFile(global.StorageName, file, 0644)
+	err = os.WriteFile(dir+"/"+global.StorageName, file, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func ReadFile() []list.Model {
-	file, err := os.ReadFile(global.StorageName)
+	file, err := os.ReadFile(dir + "/" + global.StorageName)
 	if err != nil {
 		log.Fatal(err)
 	}

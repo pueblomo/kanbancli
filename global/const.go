@@ -10,4 +10,5 @@ const (
 
 const Divisor = 4
 
-const StorageName = "kanbanclistorage.json"
+const StoragePath = "kanbancli"
+const StorageName = StoragePath + "/kanbanclistorage.json"
