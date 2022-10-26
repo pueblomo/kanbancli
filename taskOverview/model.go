@@ -23,8 +23,6 @@ var (
 	tagStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("242")).
 			MarginBottom(1)
-	descStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("7"))
 )
 
 type model struct {
@@ -58,7 +56,7 @@ func (m *model) View() string {
 		lipgloss.Top,
 		titleRender,
 		tagStyle.Render(m.task.Tag),
-		descStyle.Render(m.task.Desc),
+		m.task.Desc,
 	))
 }
 
