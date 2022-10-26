@@ -18,7 +18,7 @@ func (t Task) Description() string {
 }
 
 func (t Task) FilterValue() string {
-	return t.Subject
+	return t.Subject + t.Tag
 }
 
 func New(title, tag, description string) Task {

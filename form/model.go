@@ -24,6 +24,8 @@ type model struct {
 	tag         textinput.Model
 	description textarea.Model
 	oldModel    tea.Model
+	editMode    bool
+	status      global.Status
 }
 
 func (m *model) Init() tea.Cmd {
@@ -40,6 +42,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "ctrl+x":
+			if m.editMode {
+				return m.oldModel, m.updateTask
+			}
 			return m.oldModel, m.createTask
 		case "tab":
 			if m.titel.Focused() {
@@ -58,6 +63,15 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc":
 			return m.oldModel, nil
 		}
+	case item.Task:
+		m.titel.SetValue(msg.Subject)
+		m.description.SetValue(msg.Desc)
+		m.tag.SetValue(msg.Tag)
+		m.titel.Focus()
+		m.tag.Blur()
+		m.editMode = true
+		m.status = msg.Status
+		return m, textinput.Blink
 	}
 
 	if m.titel.Focused() {
@@ -85,7 +99,13 @@ func (m *model) View() string {
 
 func (m model) createTask() tea.Msg {
 	task := item.New(m.titel.Value(), m.tag.Value(), m.description.Value())
-	return item.NewTaskMsg(true, task)
+	return item.NewTaskMsg(global.Create, task)
+}
+
+func (m model) updateTask() tea.Msg {
+	task := item.New(m.titel.Value(), m.tag.Value(), m.description.Value())
+	task.Status = m.status
+	return item.NewTaskMsg(global.Update, task)
 }
 
 func New(oldModel tea.Model, height, width int) *model {
@@ -100,6 +120,8 @@ func New(oldModel tea.Model, height, width int) *model {
 	f.oldModel = oldModel
 	f.setHeight(height)
 	f.setWidth(width)
+	f.editMode = false
+	f.status = global.Todo
 	return f
 }
 

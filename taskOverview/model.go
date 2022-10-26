@@ -41,7 +41,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		focusedStyle.Width(msg.Width/global.Divisor - global.Divisor)
 		focusedStyle.Height(msg.Height - global.Divisor)
 	case item.TaskMsg:
-		if !msg.Create {
+		if msg.Type == global.Show {
 			m.task = msg.Task
 		}
 	}

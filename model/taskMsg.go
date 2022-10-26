@@ -1,10 +1,12 @@
 package model
 
+import "pueblomo/kanbancli/global"
+
 type TaskMsg struct {
-	Create bool
-	Task   Task
+	Type global.MsgType
+	Task Task
 }
 
-func NewTaskMsg(create bool, task Task) TaskMsg {
-	return TaskMsg{Create: create, Task: task}
+func NewTaskMsg(msgType global.MsgType, task Task) TaskMsg {
+	return TaskMsg{Type: msgType, Task: task}
 }

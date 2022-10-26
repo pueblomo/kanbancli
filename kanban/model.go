@@ -75,7 +75,7 @@ func (m *Model) moveToNext() tea.Msg {
 }
 
 func (m *Model) showTask() tea.Msg {
-	return item.NewTaskMsg(false, m.lists[m.focused].SelectedItem().(item.Task))
+	return item.NewTaskMsg(global.Show, m.lists[m.focused].SelectedItem().(item.Task))
 }
 
 func (m *Model) deleteTask() tea.Msg {
@@ -107,8 +107,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.showTask
 		case "r":
 			return m, m.deleteTask
-		case "n":
+		case "a":
 			return form.New(m, m.lists[global.Todo].Height(), m.lists[global.Todo].Width()).Update(nil)
+		case "e":
+			return form.New(m, m.lists[global.Todo].Height(), m.lists[global.Todo].Width()).Update(m.lists[m.focused].SelectedItem().(item.Task))
 		}
 	case tea.WindowSizeMsg:
 		height := msg.Height - global.Divisor
@@ -122,8 +124,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lists[global.Done].SetSize(width, height)
 		return m, nil
 	case item.TaskMsg:
-		if msg.Create {
+		if msg.Type == global.Create {
 			return m, m.lists[global.Todo].InsertItem(len(m.lists[global.Todo].Items()), msg.Task)
+		}
+		if msg.Type == global.Update {
+			return m, m.lists[m.focused].SetItem(m.lists[m.focused].Index(), msg.Task)
 		}
 	}
 
