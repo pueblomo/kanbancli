@@ -37,7 +37,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		focusedStyle.Width(msg.Width/global.Divisor - global.Divisor)
-		focusedStyle.Height(msg.Height - global.Divisor)
+		focusedStyle.Height(msg.Height - global.Divisor - 2)
 	case item.TaskMsg:
 		if msg.Type == global.Show {
 			m.task = msg.Task

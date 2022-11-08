@@ -1,8 +1,8 @@
 package kanban
 
 import (
-	"pueblomo/kanbancli/form"
 	"pueblomo/kanbancli/global"
+	"pueblomo/kanbancli/kanban/form"
 	item "pueblomo/kanbancli/model"
 	"pueblomo/kanbancli/storage"
 
@@ -26,8 +26,8 @@ type Model struct {
 	lists   []list.Model
 }
 
-func (m *Model) initLists() {
-	m.lists = storage.ReadFile()
+func (m *Model) InitLists(project string) {
+	m.lists = storage.ReadFile(project)
 }
 
 func (m Model) GetLists() []list.Model {
@@ -38,9 +38,18 @@ func (m Model) GetSize() (height int, width int) {
 	return m.lists[global.Todo].Height(), m.lists[global.Todo].Width()
 }
 
-func New() *Model {
+func (m *Model) ReloadLists(project string) {
+	storage.CheckFileExists(project)
+	lists := storage.ReadFile(project)
+	m.lists[0].SetItems(lists[0].Items())
+	m.lists[1].SetItems(lists[1].Items())
+	m.lists[2].SetItems(lists[2].Items())
+}
+
+func New(project string) *Model {
 	m := &Model{focused: global.Todo, lists: []list.Model{}}
-	m.initLists()
+	storage.CheckFileExists(project)
+	m.InitLists(project)
 	return m
 }
 
@@ -103,17 +112,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.next
 		case "enter":
 			return m, m.moveToNext
-		case "s":
+		case "ctrl+s":
 			return m, m.showTask
-		case "r":
+		case "ctrl+r":
 			return m, m.deleteTask
-		case "a":
+		case "ctrl+a":
 			return form.New(m, m.lists[global.Todo].Height(), m.lists[global.Todo].Width()).Update(nil)
-		case "e":
+		case "ctrl+e":
 			return form.New(m, m.lists[global.Todo].Height(), m.lists[global.Todo].Width()).Update(m.lists[m.focused].SelectedItem().(item.Task))
 		}
 	case tea.WindowSizeMsg:
-		height := msg.Height - global.Divisor
+		height := msg.Height - global.Divisor*2
 		width := msg.Width/global.Divisor - global.Divisor
 		columnStyle.Width(width)
 		focusedStyle.Width(width)
